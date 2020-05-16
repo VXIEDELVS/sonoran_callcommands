@@ -18,4 +18,4 @@ config = {
     enablePanic = true
 }
 
-Config.RegisterPluginConfig(config.pluginName, config)
+--Config.RegisterPluginConfig(config.pluginName, config)
