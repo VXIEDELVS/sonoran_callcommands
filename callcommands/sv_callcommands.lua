@@ -23,22 +23,21 @@ if pluginConfig.enabled then
                 description = "(511 CALL) "..description
             end
             local caller = nil
-            -- Checking wether you have set it to standalone or esx.
-            if Config.serverType == "standalone" then
-                -- Getting the Steam Name
-                caller = GetPlayerName(source) 
-            elseif Config.serverType == "esx" then
+            if isPluginLoaded("esxsupport") then
                 -- Getting the ESX Identity Name
-                local name = getIdentity(source)
-                if name ~= nil then
-                    caller = ("%s %s"):format(name.firstname,name.lastname)
-                else
-                    debugPrint("[SenoranCAD] Warning: Unable to get a proper identity for the caller. Falling back to player name.")
-                    caller = GetPlayerName(source)
+                GetIdentity(source, function(identity)
+                    if identity.firstname ~= nil then
+                        caller = ("%s %s"):format(identity.firstname,identity.lastname)
+                    else
+                        caller = GetPlayerName(source)
+                        debugLog("Unable to get player name from ESX. Falled back to in-game name.")
+                    end
+                end)
+                while caller == nil do
+                    Wait(1)
                 end
             else
-                print("ERROR: Improper serverType was specified in configuration. Please check it!")
-                return
+                caller = GetPlayerName(source) 
             end
             -- Sending the API event
             TriggerEvent('SonoranCAD::callcommands:SendCallApi', isEmergency, caller, callLocation, description, source)
