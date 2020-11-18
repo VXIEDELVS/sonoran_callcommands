@@ -26,8 +26,8 @@ if pluginConfig.enabled then
             if isPluginLoaded("esxsupport") then
                 -- Getting the ESX Identity Name
                 GetIdentity(source, function(identity)
-                    if identity.firstname ~= nil then
-                        caller = ("%s %s"):format(identity.firstname,identity.lastname)
+                    if identity.name ~= nil then
+                        caller = name
                     else
                         caller = GetPlayerName(source)
                         debugLog("Unable to get player name from ESX. Falled back to in-game name.")
