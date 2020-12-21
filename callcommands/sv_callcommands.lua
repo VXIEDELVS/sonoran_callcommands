@@ -9,12 +9,20 @@
 local pluginConfig = Config.GetPluginConfig("callcommands")
 
 if pluginConfig.enabled then
+
+    local random = math.random
+    local function uuid()
+        math.randomseed(os.time())
+        local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+        return string.gsub(template, '[xy]', function (c)
+            local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
+            return string.format('%x', v)
+        end)
+    end
     -- 911/311 Handler
     function HandleCivilianCall(type, source, args, rawCommand)
-        -- Getting the user's Steam Hexidecimal and getting their location from the table.
         local isEmergency = type == "911" and true or false
         local identifier = GetIdentifiers(source)[Config.primaryIdentifier]
-        local index = findIndex(identifier)
         local callLocation = LocationCache[source] ~= nil and LocationCache[source].location or 'Unknown'
         -- Checking if there are any description arguments.
         if args[1] then
@@ -82,9 +90,21 @@ if pluginConfig.enabled then
     RegisterServerEvent('SonoranCAD::callcommands:SendCallApi')
     AddEventHandler('SonoranCAD::callcommands:SendCallApi', function(emergency, caller, location, description, source)
         -- send an event to be consumed by other resources
-        TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location, description, source)
+        local uid = uuid()
+        TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location, description, source, uid)
         if Config.apiSendEnabled then
-            local data = {['serverId'] = Config.serverId, ['isEmergency'] = emergency, ['caller'] = caller, ['location'] = location, ['description'] = description}
+            local data = {
+                ['serverId'] = Config.serverId, 
+                ['isEmergency'] = emergency, 
+                ['caller'] = caller, 
+                ['location'] = location, 
+                ['description'] = description,
+                ['metaData'] = {
+                    ['callerPlayerId'] = source,
+                    ['callerApiId'] = GetIdentifiers(source)[Config.primaryIdentifier],
+                    ['uuid'] = uid
+                }
+            }
             debugLog("sending call!")
             performApiRequest({data}, 'CALL_911', function() end)
         else
