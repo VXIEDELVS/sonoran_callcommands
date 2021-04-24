@@ -89,6 +89,9 @@ if pluginConfig.enabled then
     -- Client Call request
     RegisterServerEvent('SonoranCAD::callcommands:SendCallApi')
     AddEventHandler('SonoranCAD::callcommands:SendCallApi', function(emergency, caller, location, description, source)
+        if location == '' then
+            location = LocationCache[source] ~= nil and LocationCache[source].location or 'Unknown'
+        end
         -- send an event to be consumed by other resources
         local uid = uuid()
         TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location, description, source, uid)
