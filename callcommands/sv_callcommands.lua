@@ -88,7 +88,7 @@ if pluginConfig.enabled then
 
     -- Client Call request
     RegisterServerEvent('SonoranCAD::callcommands:SendCallApi')
-    AddEventHandler('SonoranCAD::callcommands:SendCallApi', function(emergency, caller, location, description, source, silenceAlert)
+    AddEventHandler('SonoranCAD::callcommands:SendCallApi', function(emergency, caller, location, description, source, silenceAlert, useCallLocation)
         if location == '' then
             location = LocationCache[source] ~= nil and LocationCache[source].location or 'Unknown'
         end
@@ -96,6 +96,7 @@ if pluginConfig.enabled then
         local uid = uuid()
         TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location, description, source, uid)
         if silenceAlert == nil then silenceAlert = false end
+        if useCallLocation == nil then useCallLocation = false end
         if Config.apiSendEnabled then
             local data = {
                 ['serverId'] = Config.serverId, 
@@ -107,7 +108,12 @@ if pluginConfig.enabled then
                     ['callerPlayerId'] = source,
                     ['callerApiId'] = GetIdentifiers(source)[Config.primaryIdentifier],
                     ['uuid'] = uid,
-                    ['silentAlert'] = silenceAlert
+                    ['silentAlert'] = silenceAlert,
+                    ['useCallLocation'] = useCallLocation,
+                    ['callPostal'] = PostalsCache[source],
+                    ['callLocationx'] = LocationCache[source].position.x,
+                    ['callLocationy'] = LocationCache[source].position.y,
+                    ['callLocationz'] = LocationCache[source].position.z
                 }
             }
             debugLog("sending call!")
