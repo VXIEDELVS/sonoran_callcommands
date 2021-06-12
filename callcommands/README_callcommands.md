@@ -8,6 +8,8 @@
 | 511     | Sends specific 511 call to the CAD (Civil)  |
 | 311     | Sends non-emergency call to the CAD (Civil) |
 
+These commands are offered as defaults. You can freely customize these in the configuration.
+
 ## Custom Events
 
 ```
@@ -18,4 +20,6 @@
       location = street / cross street string
       description = description of call
       source = playerId
+      uid = unique ID of the call
+      type = type of call it is
 ```
