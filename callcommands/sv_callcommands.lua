@@ -86,6 +86,10 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
             TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location, description, source, uid, type)
             if silenceAlert == nil then silenceAlert = false end
             if useCallLocation == nil then useCallLocation = false end
+            local postal = ""
+            if isPluginLoaded("postals") and PostalsCache ~= nil then
+                postal = PostalsCache[source]
+            end
             if Config.apiSendEnabled then
                 local data = {
                     ['serverId'] = Config.serverId, 
@@ -99,7 +103,7 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                         ['uuid'] = uid,
                         ['silentAlert'] = silenceAlert,
                         ['useCallLocation'] = useCallLocation,
-                        ['callPostal'] = PostalsCache[source],
+                        ['callPostal'] = postal,
                         ['callLocationx'] = LocationCache[source].position.x,
                         ['callLocationy'] = LocationCache[source].position.y,
                         ['callLocationz'] = LocationCache[source].position.z
