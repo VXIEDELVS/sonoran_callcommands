@@ -141,6 +141,7 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
         end)
         function sendPanic(source)
             -- Determine identifier
+            local source = tostring(source)
             local identifier = GetIdentifiers(source)[Config.primaryIdentifier]
             -- Process panic POST request
             if pluginConfig.addPanicCall then
