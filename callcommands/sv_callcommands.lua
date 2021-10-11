@@ -175,8 +175,6 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                 }
                 debugLog(("perform panic request %s"):format(json.encode(data)))
                 performApiRequest({data}, 'CALL_911', function(resp) debugLog(resp) end)
-            else
-                errorLog("hmm")
             end
             performApiRequest({{['isPanic'] = true, ['apiId'] = identifier}}, 'UNIT_PANIC', function() end)
         end
