@@ -124,10 +124,60 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
         -- Unit Panic
         ---------------------------------
         -- shared function to send panic signals
+
+        --TriggerEvent("SonoranCAD::pushevents:UnitPanic", unit, body.data.identId)
+        AddEventHandler("SonoranCAD::pushevents:UnitPanic", function(unit, ident, isPanic)
+            debugLog(("triggered panic %s"):format(json.encode(unit)))
+            if not isPanic then
+                return debugLog("ignore panic, was toggled off")
+            end
+            local unit = GetUnitCache()[GetUnitById(ident)]
+            if unit then
+                local player = GetSourceByApiId(unit.data.apiIds)
+                if player then
+                    sendPanic(player)
+                end
+            end
+        end)
         function sendPanic(source)
             -- Determine identifier
             local identifier = GetIdentifiers(source)[Config.primaryIdentifier]
             -- Process panic POST request
+            if pluginConfig.addPanicCall then
+                local unit = GetUnitByPlayerId(source)
+                if not unit then
+                    debugLog("Caller not a unit, ignoring.")
+                    return
+                end
+                local postal = ""
+                if isPluginLoaded("postals") and PostalsCache[source] ~= nil then
+                    postal = PostalsCache[source]
+                else
+                    debugLog("postal is nil?!")
+                end
+                local data = {
+                    ['serverId'] = Config.serverId, 
+                    ['isEmergency'] = true, 
+                    ['caller'] = unit.data.name, 
+                    ['location'] = unit.location, 
+                    ['description'] = ("Unit %s has pressed their panic button!"):format(unit.data.unitNum),
+                    ['metaData'] = {
+                        ['callerPlayerId'] = source,
+                        ['callerApiId'] = GetIdentifiers(source)[Config.primaryIdentifier],
+                        ['uuid'] = uuid(),
+                        ['silentAlert'] = false,
+                        ['useCallLocation'] = false,
+                        ['callPostal'] = postal,
+                        ['callLocationx'] = LocationCache[source].position.x,
+                        ['callLocationy'] = LocationCache[source].position.y,
+                        ['callLocationz'] = LocationCache[source].position.z
+                    }
+                }
+                debugLog(("perform panic request %s"):format(json.encode(data)))
+                performApiRequest({data}, 'CALL_911', function(resp) debugLog(resp) end)
+            else
+                errorLog("hmm")
+            end
             performApiRequest({{['isPanic'] = true, ['apiId'] = identifier}}, 'UNIT_PANIC', function() end)
         end
     
