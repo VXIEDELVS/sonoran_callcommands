@@ -64,12 +64,12 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
             end
             if pluginConfig.enablePanic then
                 RegisterCommand('panic', function(source, args, rawCommand)
-                    sendPanic(source)
+                    sendPanic(source. true)
                 end, false)
                 -- Client Panic request (to be used by other resources)
                 RegisterNetEvent('SonoranCAD::callcommands:SendPanicApi')
                 AddEventHandler('SonoranCAD::callcommands:SendPanicApi', function(source)
-                    sendPanic(source)
+                    sendPanic(source, true)
                 end)
             end
     
@@ -143,7 +143,7 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                 end
             end
         end)
-        function sendPanic(source)
+        function sendPanic(source, ispanicrequest)
             -- Determine identifier
             local source = tostring(source)
             local identifier = GetIdentifiers(source)[Config.primaryIdentifier]
@@ -185,7 +185,7 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                 debugLog(("perform panic request %s"):format(json.encode(data)))
                 performApiRequest({data}, 'CALL_911', function(resp) debugLog(resp) end)
             end
-            performApiRequest({{['isPanic'] = true, ['apiId'] = identifier}}, 'UNIT_PANIC', function() end)
+            if ispanicrequest then performApiRequest({{['isPanic'] = true, ['apiId'] = identifier}}, 'UNIT_PANIC', function() end) end
         end
     
     end
