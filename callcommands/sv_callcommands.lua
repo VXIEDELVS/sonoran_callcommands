@@ -148,7 +148,7 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
             local source = tostring(source)
             local identifier = GetIdentifiers(source)[Config.primaryIdentifier]
             -- Process panic POST request
-            if pluginConfig.addPanicCall then
+            if pluginConfig.addPanicCall and not ispanicrequest then
                 local unit = GetUnitByPlayerId(source)
                 if not unit then
                     debugLog("Caller not a unit, ignoring.")
