@@ -74,6 +74,62 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
             end
     
         end)
+
+
+        --[[
+            data: valid key/value pairs:
+                title = title of call (required)
+                description = description of call (required)
+                block = block field of call
+                code = 10 code of call
+                origin = ID of origin, default is 0 (Caller)
+                status = usually 1 (pending)
+                priority = Priority of call, default is 2
+                address = location of call (required)
+                postal = call postal
+                isEmergency = (true/false) whether this is a 911 call, default true
+                notes = array of notes to add to the call when created
+                metaData = key/value pair of metadata to attach to the call
+                units = array of unit API IDs to auto-attach
+        ]]
+        AddEventHandler("SonoranCAD::callcommands:CreateCall", function(data)
+            local payload = {
+                serverId = Config.serverId,
+                origin = 0, 
+                status = 1, 
+                priority = 2,
+                block = "",
+                code = "",
+                postal = "",
+                address = "", 
+                title = "",
+                description = "", 
+                isEmergency = true,
+                notes = {},
+                metaData = {},
+                units = {} 
+            }
+            for k, v in pairs(data) do
+                payload[k] = v
+            end
+            performApiRequest({payload}, "NEW_DISPATCH", function(response)
+                if response:match("NEW DISPATCH CREATED - ID:") then
+                    TriggerEvent("SonoranCAD::callcommands:CallCreated", response:match("%d+"))
+                else
+                    warnLog("Call creation returned unexpected response: "..tostring(response))
+                end
+            end)
+        end)
+
+        AddEventHandler("SonoranCAD::callcommands:SendPanic", function(playerId)
+            local id = GetIdentifiers(playerId)[Config.primaryIdentifier]
+            if id then 
+                performApiRequest({{['isPanic'] = true, ['apiId'] = id}}, 'UNIT_PANIC', function() 
+                    debugLog(("Sent panic event for %s"):format(id)) 
+                    TriggerEvent("SonoranCAD::callcommands:PanicSent", playerId)
+                end)
+            end
+        end)
     
         -- Client Call request
         RegisterServerEvent('SonoranCAD::callcommands:SendCallApi')
@@ -107,9 +163,9 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                     }
                 }
                 if LocationCache[source] ~= nil then
-                    data['metaData']['callLocationx'] = LocationCache[source].position.x
-                    data['metaData']['callLocationy'] = LocationCache[source].position.y
-                    data['metaData']['callLocationz'] = LocationCache[source].position.z
+                    data['metaData']['x'] = LocationCache[source].coordinates.x
+                    data['metaData']['y'] = LocationCache[source].coordinates.y
+                    data['metaData']['z'] = LocationCache[source].coordinates.z
                 else
                     debugLog("Warning: location cache was nil, not sending position")
                 end
@@ -176,9 +232,9 @@ CreateThread(function() Config.LoadPlugin("callcommands", function(pluginConfig)
                     }
                 }
                 if LocationCache[source] ~= nil then
-                    data['metaData']['callLocationx'] = LocationCache[source].position.x
-                    data['metaData']['callLocationy'] = LocationCache[source].position.y
-                    data['metaData']['callLocationz'] = LocationCache[source].position.z
+                    data['metaData']['x'] = LocationCache[source].coordinates.x
+                    data['metaData']['y'] = LocationCache[source].coordinates.y
+                    data['metaData']['z'] = LocationCache[source].coordinates.z
                 else
                     debugLog("Warning: location cache was nil, not sending position")
                 end
