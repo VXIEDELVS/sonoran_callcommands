@@ -141,7 +141,7 @@
             -- Client Call request
             RegisterServerEvent('SonoranCAD::callcommands:SendCallApi')
             AddEventHandler('SonoranCAD::callcommands:SendCallApi',
-                function(emergency, caller, location, description, source, silenceAlert, useCallLocation, type)
+                function(emergency, caller, location, description, source, silenceAlert, useCallLocation, t)
                     local postal = ""
                     if location == '' then
                         location = LocationCache[source] ~= nil and LocationCache[source].location or 'Unknown'
@@ -151,7 +151,7 @@
                     -- send an event to be consumed by other resources
                     local uid = uuid()
                     TriggerEvent("SonoranCAD::callcommands:cadIncomingCall", emergency, caller, location,
-                        description, source, uid, type)
+                        description, source, uid, t)
                     if silenceAlert == nil then
                         silenceAlert = false
                     end
