@@ -174,7 +174,7 @@
                                 ['uuid'] = uid,
                                 ['silentAlert'] = silenceAlert,
                                 ['useCallLocation'] = useCallLocation,
-                                ['callPostal'] = postal
+                                ['postal'] = postal
                             }
                         }
                         if LocationCache[source] ~= nil then
@@ -244,7 +244,7 @@
                             ['uuid'] = uuid(),
                             ['silentAlert'] = false,
                             ['useCallLocation'] = false,
-                            ['callPostal'] = postal
+                            ['postal'] = postal
                         }
                     }
                     if LocationCache[source] ~= nil then
