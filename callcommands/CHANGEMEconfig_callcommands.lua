@@ -18,7 +18,9 @@ local config  = {
     },
     enablePanic = true,
     -- adds an emergency call when panic button is pressed
-    addPanicCall = true
+    addPanicCall = true,
+
+    usePositionForMetadata = false,
 }
 
 if config.enabled then

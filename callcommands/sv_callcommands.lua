@@ -146,7 +146,11 @@
                     if location == '' then
                         location = LocationCache[source] ~= nil and LocationCache[source].location or 'Unknown'
                     elseif type(location) == 'vector3' then
-                        postal = getPostalFromVector3(location)
+                        if isPluginLoaded("postals") then
+                            postal = getPostalFromVector3(location)
+                        else
+                            postal = "Unknown"
+                        end
                     end
                     -- send an event to be consumed by other resources
                     local uid = uuid()
@@ -181,6 +185,10 @@
                             data['metaData']['x'] = LocationCache[source].coordinates.x
                             data['metaData']['y'] = LocationCache[source].coordinates.y
                             data['metaData']['z'] = LocationCache[source].coordinates.z
+                        elseif type(location) == "vector3" and pluginConfig.usePositionForMetadata then
+                            data['metaData']['x'] = location.x
+                            data['metaData']['y'] = location.y
+                            data['metaData']['z'] = location.z
                         else
                             debugLog("Warning: location cache was nil, not sending position")
                         end
